@@ -5,22 +5,23 @@ penetration_values = {"TV":2.5,"SEO":2.1,"Adwords":0.9,"Facebook":3}
 budget = 1000000
 viewer_count = 1300000
 
+# pyomo concrete model
 from pyomo.environ import *
 model = ConcreteModel()
 
 # Indexes >> Campaigns to Evaluate
 model.campaign = Set(initialize = list_of_campaigns)
 
-# Parameters >> Data Available 
+# Parameters >> Data Available
 model.roi = Param(model.campaign, initialize = roi_values)
-model.penetration = Param(model.campaign, initialize =penetration_values) 
+model.penetration = Param(model.campaign, initialize =penetration_values)
 model.total_budget = Param(initialize = budget)
 model.total_viewers = Param(initialize = viewer_count)
 
 # Variables >> Budget Allocations
 model.allocation = Var(model.campaign, within= NonNegativeReals)
 
-# Constraints >> As provided in seq 
+# Constraints >> As provided in seq
 def primary_spend_limit(model):
 	return model.allocation["SEO"] + model.allocation["Adwords"] <= 0.6*model.total_budget
 model.primary_spend_equation = Constraint(rule=primary_spend_limit)
@@ -57,7 +58,7 @@ def total_budget_allocation(model):
 	return sum(model.allocation[c] for c in model.campaign) <= model.total_budget
 model.total_budget_equation = Constraint(rule = total_budget_allocation)
 
-# Objective Function >> Achieve all of these while maximum roi 
+# Objective Function >> Achieve all of these while maximum roi
 model.objective = Objective(expr = sum(model.allocation[c]*(model.roi[c]/100) for c in model.campaign),sense=maximize)
 
 #----------------------------------- Method : pyomo.solve -------------------------------------------------------------
@@ -70,4 +71,3 @@ results = opt.solve(model, tee= True)
 model.solutions.store_to(results)
 # print (results)
 results.write()
-
