@@ -64,9 +64,8 @@ model.objective = Objective(expr = sum(model.allocation[c]*(model.roi[c]/100) fo
 #----------------------------------- Method : pyomo.solve -------------------------------------------------------------
 # >>>> cbc/glpk (present as one of the environment variables)
 
-opt = SolverFactory('cbc',solver_io = 'lp')
-# opt.options["sec"] = 180
-# opt.options['threads'] = 2
+opt = SolverFactory('cbc')
+opt.options['slog']=1
 results = opt.solve(model, tee= True)
 model.solutions.store_to(results)
 # print (results)
